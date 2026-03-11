@@ -15,6 +15,7 @@ const slotsRoutes = require('./api/routes/slots');
 const bookingsRoutes = require('./api/routes/bookings');
 const businessRoutes = require('./api/routes/business');
 const adminRoutes = require('./api/routes/admin');
+const initRoutes = require('./api/routes/init');
 
 // Import services
 const SlotEngine = require('./services/slot-engine');
@@ -62,6 +63,7 @@ app.use('/api/slots', slotsRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/init', initRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {

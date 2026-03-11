@@ -18,11 +18,18 @@ function Services() {
   };
 
   if (error) {
-    showAlert('Ошибка загрузки услуг. Попробуйте позже.');
+    showAlert('Ошибка загрузки услуг: ' + error);
   }
 
   return (
     <div className="min-h-screen bg-tg-bg p-4">
+      {/* Debug info */}
+      <div className="mb-4 p-2 bg-gray-800 text-xs text-white rounded">
+        <div>Services: {services.length}</div>
+        <div>Loading: {isLoading ? 'yes' : 'no'}</div>
+        <div>Error: {error || 'none'}</div>
+      </div>
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-tg-text">Выберите услугу</h1>

@@ -1,4 +1,5 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://booking-app-backend-jeme.onrender.com';
+const BUSINESS_ID = import.meta.env.VITE_BUSINESS_ID || 'demo-business';
 
 /**
  * API клиент для взаимодействия с backend
@@ -33,6 +34,7 @@ class ApiClient {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       'Content-Type': 'application/json',
+      'X-Business-Id': BUSINESS_ID,
       ...options.headers,
     };
 
@@ -49,7 +51,7 @@ class ApiClient {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
-        throw new ApiError(error.message || `HTTP ${response.status}`, response.status);
+        throw new ApiError(error.message || error.error || `HTTP ${response.status}`, response.status);
       }
 
       return await response.json();

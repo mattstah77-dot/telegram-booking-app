@@ -10,7 +10,7 @@ router.get('/:date', async (req, res, next) => {
   try {
     const { date } = req.params;
     const { serviceId } = req.query;
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     
     if (!serviceId) {
       return res.status(400).json({
@@ -37,7 +37,7 @@ router.get('/:date', async (req, res, next) => {
  */
 router.post('/generate', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { days = 14 } = req.body;
     
     const slotEngine = req.slotEngine;
@@ -60,7 +60,7 @@ router.post('/generate', async (req, res, next) => {
  */
 router.delete('/cache', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const prisma = req.prisma;
     
     const result = await prisma.slotCache.deleteMany({

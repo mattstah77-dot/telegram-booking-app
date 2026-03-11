@@ -28,9 +28,26 @@ const { initBot, handleWebhook, setWebhook } = require('./bot');
 // Initialize app
 const app = express();
 
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'https://booking-miniapp.onrender.com',
+    'https://t.me',
+    'https://telegram.org',
+    /\.telegram\.org$/,
+    /\.onrender\.com$/
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Business-Id', 'X-Telegram-Init-Data']
+};
+
 // Middleware
-app.use(helmet());
-app.use(cors());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+app.use(cors(corsOptions));
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json());

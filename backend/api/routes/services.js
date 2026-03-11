@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
 
 /**
  * GET /api/services
@@ -10,7 +7,8 @@ const prisma = new PrismaClient();
  */
 router.get('/', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const prisma = req.prisma;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     
     const services = await prisma.service.findMany({
       where: {
@@ -34,6 +32,7 @@ router.get('/', async (req, res, next) => {
  */
 router.get('/:id', async (req, res, next) => {
   try {
+    const prisma = req.prisma;
     const { id } = req.params;
     
     const service = await prisma.service.findUnique({
@@ -56,7 +55,8 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const prisma = req.prisma;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { name, description, price, durationMinutes, bufferMinutes, order } = req.body;
     
     // Validation
@@ -92,6 +92,7 @@ router.post('/', async (req, res, next) => {
  */
 router.put('/:id', async (req, res, next) => {
   try {
+    const prisma = req.prisma;
     const { id } = req.params;
     const { name, description, price, durationMinutes, bufferMinutes, isActive, order } = req.body;
     
@@ -123,6 +124,7 @@ router.put('/:id', async (req, res, next) => {
  */
 router.delete('/:id', async (req, res, next) => {
   try {
+    const prisma = req.prisma;
     const { id } = req.params;
     
     // Check for active bookings

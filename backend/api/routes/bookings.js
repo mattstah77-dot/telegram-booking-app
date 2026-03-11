@@ -8,7 +8,7 @@ const router = express.Router();
  */
 router.get('/', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { date, status, limit = 50, offset = 0 } = req.query;
     
     const prisma = req.prisma;
@@ -88,7 +88,7 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { serviceId, date, time, clientName, clientPhone, telegramId, notes } = req.body;
     
     // Validation

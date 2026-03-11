@@ -7,7 +7,7 @@ const router = express.Router();
  */
 router.get('/', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const prisma = req.prisma;
     
     const business = await prisma.business.findUnique({
@@ -39,7 +39,7 @@ router.get('/', async (req, res, next) => {
  */
 router.put('/', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const prisma = req.prisma;
     
     const { name, description, address, phone, timezone, bufferMinutes, maxDaysAhead, minBookingMinutes, cancellationHours, autoConfirm } = req.body;
@@ -75,7 +75,7 @@ router.put('/', async (req, res, next) => {
  */
 router.get('/schedule', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const prisma = req.prisma;
     
     const schedule = await prisma.schedule.findMany({
@@ -95,7 +95,7 @@ router.get('/schedule', async (req, res, next) => {
  */
 router.put('/schedule/:weekday', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { weekday } = req.params;
     const { isWorking, startTime, endTime } = req.body;
     const prisma = req.prisma;
@@ -133,7 +133,7 @@ router.put('/schedule/:weekday', async (req, res, next) => {
  */
 router.get('/exceptions', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const prisma = req.prisma;
     
     const exceptions = await prisma.exception.findMany({
@@ -153,7 +153,7 @@ router.get('/exceptions', async (req, res, next) => {
  */
 router.post('/exceptions', async (req, res, next) => {
   try {
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
+    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { date, type, openTime, closeTime, reason } = req.body;
     const prisma = req.prisma;
     

@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'https://booking-app-backend-jeme.onrender.com';
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://booking-app-backend-jeme.onrender.com') + '/api';
 const BUSINESS_ID = import.meta.env.VITE_BUSINESS_ID || 'demo-business';
 
 /**

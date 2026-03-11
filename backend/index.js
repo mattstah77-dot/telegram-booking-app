@@ -21,6 +21,9 @@ const SlotEngine = require('./services/slot-engine');
 const BookingEngine = require('./services/booking-engine');
 const NotificationService = require('./services/notifications');
 
+// Import bot
+const { initBot, handleWebhook, setWebhook } = require('./bot');
+
 // Initialize app
 const app = express();
 
@@ -49,6 +52,9 @@ app.get('/health', (req, res) => {
     version: process.env.npm_package_version || '1.0.0'
   });
 });
+
+// Telegram bot webhook endpoint
+app.post('/bot/webhook', handleWebhook);
 
 // API Routes
 app.use('/api/services', servicesRoutes);
@@ -118,9 +124,26 @@ process.on('SIGINT', async () => {
 
 // Start server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+
+// Initialize bot
+const bot = initBot();
+
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
+  // Set webhook for bot if token is configured
+  if (bot && process.env.TELEGRAM_BOT_TOKEN) {
+    const baseUrl = process.env.BACKEND_URL || `http://localhost:${PORT}`;
+    const webhookUrl = `${baseUrl}/bot/webhook`;
+    
+    try {
+      await setWebhook(webhookUrl);
+      console.log(`Bot webhook set: ${webhookUrl}`);
+    } catch (error) {
+      console.error('Failed to set webhook:', error);
+    }
+  }
 });
 
 module.exports = app;

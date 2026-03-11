@@ -2,7 +2,17 @@
 
 ## 📋 Описание интеграции
 
-Документ описывает интеграцию с Telegram через Bot API и Mini App SDK.
+Документ описывает интеграцию с Telegram через:
+- Bot API (Telegraf)
+- Mini App SDK
+- WebApp Data Validation
+
+### Ключевые компоненты
+
+1. **Telegram Bot** — команды и callback queries
+2. **Mini App** — React SPA с Telegram SDK
+3. **Notification Service** — отправка уведомлений
+4. **Auth** — валидация WebApp данных
 
 ---
 

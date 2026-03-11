@@ -1,0 +1,70 @@
+{
+  "id": "default",
+  "name": "Название вашего бизнеса",
+  "description": "Краткое описание услуг",
+  "address": "ул. Примерная, д. 1",
+  "phone": "+7 (999) 123-45-67",
+  "timezone": "Europe/Moscow",
+  "workingHours": {
+    "0": {
+      "isWorking": false,
+      "start": "00:00",
+      "end": "00:00"
+    },
+    "1": {
+      "isWorking": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "2": {
+      "isWorking": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "3": {
+      "isWorking": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "4": {
+      "isWorking": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "5": {
+      "isWorking": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "6": {
+      "isWorking": true,
+      "start": "10:00",
+      "end": "16:00"
+    }
+  },
+  "breaks": [
+    {
+      "start": "13:00",
+      "end": "14:00",
+      "name": "Обед"
+    }
+  ],
+  "holidays": [
+    "2025-01-01",
+    "2025-01-02",
+    "2025-01-07",
+    "2025-02-23",
+    "2025-03-08",
+    "2025-05-01",
+    "2025-05-09",
+    "2025-06-12",
+    "2025-11-04"
+  ],
+  "settings": {
+    "bufferTime": 10,
+    "minBookingTime": 30,
+    "maxDaysAhead": 30,
+    "cancellationHours": 2,
+    "autoConfirm": true
+  }
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "service-1",
+    "name": "Базовая услуга",
+    "description": "Описание базовой услуги",
+    "price": 500,
+    "duration": 30,
+    "isActive": true,
+    "order": 1
+  },
+  {
+    "id": "service-2",
+    "name": "Стандартная услуга",
+    "description": "Описание стандартной услуги",
+    "price": 800,
+    "duration": 45,
+    "isActive": true,
+    "order": 2
+  },
+  {
+    "id": "service-3",
+    "name": "Премиум услуга",
+    "description": "Описание премиум услуги",
+    "price": 1200,
+    "duration": 60,
+    "isActive": true,
+    "order": 3
+  }
+]

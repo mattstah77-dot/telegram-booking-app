@@ -1,0 +1,48 @@
+{
+  "timezone": "Europe/Moscow",
+  "workingDays": {
+    "monday": {
+      "enabled": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "tuesday": {
+      "enabled": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "wednesday": {
+      "enabled": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "thursday": {
+      "enabled": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "friday": {
+      "enabled": true,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    "saturday": {
+      "enabled": true,
+      "start": "10:00",
+      "end": "16:00"
+    },
+    "sunday": {
+      "enabled": false,
+      "start": "00:00",
+      "end": "00:00"
+    }
+  },
+  "breaks": [
+    {
+      "name": "Обед",
+      "start": "13:00",
+      "end": "14:00"
+    }
+  ],
+  "exceptions": []
+}

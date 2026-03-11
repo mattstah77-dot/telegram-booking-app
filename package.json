@@ -1,0 +1,55 @@
+{
+  "name": "telegram-booking-app",
+  "version": "1.0.0",
+  "description": "Telegram Mini App Booking System for Small Business",
+  "private": true,
+  "workspaces": [
+    "miniapp",
+    "bot",
+    "backend"
+  ],
+  "scripts": {
+    "setup": "npm install && npm run install:all",
+    "install:all": "npm run install:miniapp && npm run install:bot && npm run install:backend",
+    "install:miniapp": "cd miniapp && npm install",
+    "install:bot": "cd bot && npm install",
+    "install:backend": "cd backend && npm install",
+    "dev:miniapp": "cd miniapp && npm run dev",
+    "dev:bot": "cd bot && npm run dev",
+    "dev:firebase": "firebase emulators:start",
+    "build": "npm run build:miniapp && npm run build:bot && npm run build:backend",
+    "build:miniapp": "cd miniapp && npm run build",
+    "build:bot": "cd bot && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test": "npm run test:miniapp && npm run test:bot && npm run test:backend",
+    "test:miniapp": "cd miniapp && npm test",
+    "test:bot": "cd bot && npm test",
+    "test:backend": "cd backend && npm test",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:functions": "firebase deploy --only functions"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "telegram",
+    "mini-app",
+    "booking",
+    "appointment",
+    "small-business"
+  ],
+  "author": "NLP-Core-Team",
+  "license": "MIT"
+}

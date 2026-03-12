@@ -21,13 +21,16 @@ function App() {
         <Route path="/booking" element={<Booking />} />
         <Route path="/confirmation" element={<Confirmation />} />
         
-        {/* Admin routes */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Admin routes - with wildcard for nested routes */}
+        <Route path="/admin/*" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="services" element={<AdminServices />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="schedule" element={<AdminSchedule />} />
         </Route>
+        
+        {/* Fallback */}
+        <Route path="*" element={<Services />} />
       </Routes>
     </div>
   );

@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { adminAuth, getBusiness } from '../../utils/api';
-import { getUser } from '../../utils/telegram';
+import { getUser, tg } from '../../utils/telegram';
 
 /**
  * Layout для админ-панели
@@ -24,14 +24,14 @@ function AdminLayout() {
       if (!token) {
         // Пробуем авторизоваться через Telegram
         const user = getUser();
-        if (!user) {
-          navigate('/');
-          return;
-        }
-
-        const initData = window.Telegram?.WebApp?.initData;
-        if (!initData) {
-          navigate('/');
+        
+        // Получаем initData из Telegram WebApp
+        const initData = tg.initData || window.Telegram?.WebApp?.initData;
+        
+        if (!initData || !user) {
+          // Не из Telegram - показываем сообщение
+          console.log('No Telegram data, showing login message');
+          setIsLoading(false);
           return;
         }
 
@@ -47,7 +47,8 @@ function AdminLayout() {
       setBusiness(businessData);
     } catch (error) {
       console.error('Auth error:', error);
-      navigate('/');
+      // При ошибке показываем форму входа
+      setIsAuthorized(false);
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +63,30 @@ function AdminLayout() {
   }
 
   if (!isAuthorized) {
-    return null;
+    return (
+      <div className="min-h-screen bg-tg-bg flex flex-col items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-tg-secondary flex items-center justify-center">
+            <svg className="w-8 h-8 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-tg-text mb-2">
+            Требуется авторизация
+          </h2>
+          <p className="text-tg-hint mb-4 text-center">
+            Админ-панель доступна только через Telegram бот.<br/>
+            Откройте /admin в боте.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2.5 bg-tg-button text-tg-buttonText rounded-lg font-medium"
+          >
+            На главную
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const navItems = [

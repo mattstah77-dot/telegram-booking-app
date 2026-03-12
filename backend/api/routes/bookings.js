@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const { requireTelegramAuth, requireAdminAuth } = require('../middleware/auth');
+const { bookingLimiter, basicLimiter } = require('../middleware/rateLimit');
+const { validate, createBookingSchema } = require('../middleware/validate');
 
 /**
  * GET /api/bookings
- * Получить список записей
- * Query params: date, status, limit, offset
+ * Получить список записей (Public с ограничениями)
  */
-router.get('/', async (req, res, next) => {
+router.get('/', basicLimiter, async (req, res, next) => {
   try {
     const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { date, status, limit = 50, offset = 0 } = req.query;
@@ -60,7 +62,7 @@ router.get('/', async (req, res, next) => {
  * GET /api/bookings/:id
  * Получить запись по ID
  */
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', basicLimiter, async (req, res, next) => {
   try {
     const { id } = req.params;
     const prisma = req.prisma;
@@ -84,20 +86,12 @@ router.get('/:id', async (req, res, next) => {
 
 /**
  * POST /api/bookings
- * Создать новую запись
+ * Создать новую запись (Public)
  */
-router.post('/', async (req, res, next) => {
+router.post('/', bookingLimiter, requireTelegramAuth, validate(createBookingSchema), async (req, res, next) => {
   try {
     const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
     const { serviceId, date, time, clientName, clientPhone, telegramId, notes } = req.body;
-    
-    // Validation
-    if (!serviceId || !date || !time || !clientName || !clientPhone) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        required: ['serviceId', 'date', 'time', 'clientName', 'clientPhone']
-      });
-    }
     
     const bookingEngine = req.bookingEngine;
     
@@ -108,7 +102,7 @@ router.post('/', async (req, res, next) => {
       time,
       clientName,
       clientPhone,
-      telegramId,
+      telegramId: telegramId || req.telegramUser?.id?.toString(),
       notes
     });
     
@@ -123,7 +117,7 @@ router.post('/', async (req, res, next) => {
     const notificationService = req.notificationService;
     
     // Notify client
-    if (telegramId) {
+    if (result.booking.telegramId) {
       await notificationService.sendBookingConfirmation(result.booking);
     }
     
@@ -140,7 +134,7 @@ router.post('/', async (req, res, next) => {
  * POST /api/bookings/:id/cancel
  * Отменить запись
  */
-router.post('/:id/cancel', async (req, res, next) => {
+router.post('/:id/cancel', bookingLimiter, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { reason, cancelledBy } = req.body;
@@ -170,7 +164,7 @@ router.post('/:id/cancel', async (req, res, next) => {
  * POST /api/bookings/:id/reschedule
  * Перенести запись
  */
-router.post('/:id/reschedule', async (req, res, next) => {
+router.post('/:id/reschedule', bookingLimiter, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { newDate, newTime } = req.body;
@@ -207,7 +201,7 @@ router.post('/:id/reschedule', async (req, res, next) => {
  * PUT /api/bookings/:id/status
  * Изменить статус записи (Admin only)
  */
-router.put('/:id/status', async (req, res, next) => {
+router.put('/:id/status', requireAdminAuth, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;

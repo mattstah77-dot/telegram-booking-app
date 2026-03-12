@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
+  # Backend API (with integrated Telegram Bot)
   backend:
     build:
       context: ./backend
@@ -44,21 +44,6 @@ services:
       - "${BACKEND_PORT:-3001}:3001"
     command: >
       sh -c "npx prisma migrate deploy && npm start"
-
-  # Telegram Bot
-  bot:
-    build:
-      context: ./bot
-      dockerfile: Dockerfile
-    container_name: booking-bot
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      BACKEND_URL: http://backend:3001
-      BUSINESS_ID: ${BUSINESS_ID}
-    depends_on:
-      - backend
 
 volumes:
   postgres_data:

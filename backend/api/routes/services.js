@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const { requireAdminAuth } = require('../middleware/auth');
+const { basicLimiter } = require('../middleware/rateLimit');
+const { validate, createServiceSchema, updateServiceSchema } = require('../middleware/validate');
 
 /**
  * GET /api/services
- * Получить список активных услуг
+ * Получить список активных услуг (Public)
  */
-router.get('/', async (req, res, next) => {
+router.get('/', basicLimiter, async (req, res, next) => {
   try {
     const prisma = req.prisma;
     const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
@@ -28,9 +31,9 @@ router.get('/', async (req, res, next) => {
 
 /**
  * GET /api/services/:id
- * Получить услугу по ID
+ * Получить услугу по ID (Public)
  */
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', basicLimiter, async (req, res, next) => {
   try {
     const prisma = req.prisma;
     const { id } = req.params;
@@ -53,19 +56,11 @@ router.get('/:id', async (req, res, next) => {
  * POST /api/services (Admin only)
  * Создать новую услугу
  */
-router.post('/', async (req, res, next) => {
+router.post('/', requireAdminAuth, validate(createServiceSchema), async (req, res, next) => {
   try {
     const prisma = req.prisma;
-    const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID || 'demo-business';
+    const businessId = req.admin.businessId || process.env.BUSINESS_ID || 'demo-business';
     const { name, description, price, durationMinutes, bufferMinutes, order } = req.body;
-    
-    // Validation
-    if (!name || price === undefined || !durationMinutes) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        required: ['name', 'price', 'durationMinutes']
-      });
-    }
     
     const service = await prisma.service.create({
       data: {
@@ -90,7 +85,7 @@ router.post('/', async (req, res, next) => {
  * PUT /api/services/:id (Admin only)
  * Обновить услугу
  */
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', requireAdminAuth, validate(updateServiceSchema), async (req, res, next) => {
   try {
     const prisma = req.prisma;
     const { id } = req.params;
@@ -122,7 +117,7 @@ router.put('/:id', async (req, res, next) => {
  * DELETE /api/services/:id (Admin only)
  * Удалить услугу
  */
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', requireAdminAuth, async (req, res, next) => {
   try {
     const prisma = req.prisma;
     const { id } = req.params;

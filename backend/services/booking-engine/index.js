@@ -60,37 +60,7 @@ class BookingEngine {
       const endTimeMinutes = startTimeMinutes + service.durationMinutes;
       const endTime = this.minutesToTime(endTimeMinutes);
       
-      // 5. Проверить доступность слота (с блокировкой)
-      const existingBooking = await tx.booking.findFirst({
-        where: {
-          businessId,
-          date: dateObj,
-          status: { in: ['pending', 'confirmed'] },
-          OR: [
-            {
-              // Начало нового слота внутри существующего
-              startTime: { lte: time },
-              endTime: { gt: time }
-            },
-            {
-              // Конец нового слота внутри существующего
-              startTime: { lt: endTime },
-              endTime: { gte: endTime }
-            },
-            {
-              // Новый слот полностью перекрывает существующий
-              startTime: { gte: time },
-              endTime: { lte: endTime }
-            }
-          ]
-        }
-      });
-      
-      if (existingBooking) {
-        return { success: false, error: 'Slot already booked', code: 'SLOT_TAKEN' };
-      }
-      
-      // 6. Проверить минимальное время до записи
+      // 5. Проверить минимальное время до записи
       const now = new Date();
       const bookingDateTime = new Date(dateObj);
       bookingDateTime.setHours(hours, minutes, 0, 0);
@@ -100,34 +70,46 @@ class BookingEngine {
         return { success: false, error: 'Too short notice', code: 'TOO_SHORT_NOTICE' };
       }
       
-      // 7. Создать запись
-      const booking = await tx.booking.create({
-        data: {
-          businessId,
-          serviceId,
-          date: dateObj,
-          startTime: time,
-          endTime,
-          clientName,
-          clientPhone,
-          telegramId,
-          status: business.autoConfirm ? 'confirmed' : 'pending',
-          serviceName: service.name,
-          price: service.price,
-          duration: service.durationMinutes,
-          notes
-        },
-        include: {
-          service: true
+      // 6. Создать запись (unique constraint защитит от double booking)
+      try {
+        const booking = await tx.booking.create({
+          data: {
+            businessId,
+            serviceId,
+            date: dateObj,
+            startTime: time,
+            endTime,
+            clientName,
+            clientPhone,
+            telegramId,
+            status: business.autoConfirm ? 'confirmed' : 'pending',
+            serviceName: service.name,
+            price: service.price,
+            duration: service.durationMinutes,
+            notes
+          },
+          include: {
+            service: true
+          }
+        });
+        
+        // 7. Инвалидировать кэш слотов
+        const SlotEngine = require('../slot-engine');
+        const slotEngine = new SlotEngine(prisma);
+        await slotEngine.invalidateCache(businessId, dateObj);
+        
+        return { success: true, booking };
+      } catch (error) {
+        // Обработка unique constraint violation (double booking)
+        if (error.code === 'P2002') {
+          return { 
+            success: false, 
+            error: 'This time slot is already booked. Please select another time.', 
+            code: 'SLOT_TAKEN' 
+          };
         }
-      });
-      
-      // 8. Инвалидировать кэш слотов
-      const SlotEngine = require('../slot-engine');
-      const slotEngine = new SlotEngine(prisma);
-      await slotEngine.invalidateCache(businessId, dateObj);
-      
-      return { success: true, booking };
+        throw error;
+      }
     });
   }
 

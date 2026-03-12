@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { validateTelegramWebAppData } = require('../../utils/telegram-auth');
+const { requireAdminAuth } = require('../middleware/auth');
+const { adminLimiter } = require('../middleware/rateLimit');
 
 /**
  * POST /api/admin/auth
  * Авторизация администратора через Telegram
  */
-router.post('/auth', async (req, res, next) => {
+router.post('/auth', adminLimiter, async (req, res, next) => {
   try {
     const { initData } = req.body;
     const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
@@ -72,7 +74,7 @@ router.post('/auth', async (req, res, next) => {
  * POST /api/admin/logout
  * Выход из админ-панели
  */
-router.post('/logout', async (req, res, next) => {
+router.post('/logout', requireAdminAuth, async (req, res, next) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     const prisma = req.prisma;
@@ -93,7 +95,7 @@ router.post('/logout', async (req, res, next) => {
  * GET /api/admin/dashboard
  * Статистика для дашборда
  */
-router.get('/dashboard', async (req, res, next) => {
+router.get('/dashboard', requireAdminAuth, adminLimiter, async (req, res, next) => {
   try {
     const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
     const prisma = req.prisma;
@@ -184,7 +186,7 @@ router.get('/dashboard', async (req, res, next) => {
  * GET /api/admin/bookings
  * Получить все записи с пагинацией
  */
-router.get('/bookings', async (req, res, next) => {
+router.get('/bookings', requireAdminAuth, adminLimiter, async (req, res, next) => {
   try {
     const businessId = req.headers['x-business-id'] || process.env.BUSINESS_ID;
     const { dateFrom, dateTo, status, limit = 50, offset = 0 } = req.query;

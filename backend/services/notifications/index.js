@@ -1,6 +1,6 @@
 /**
  * Notification Service
- * Отправка уведомлений через Telegram Bot API
+ * Отправка уведомлений через Telegram Bot API с retry механизмом
  */
 
 const axios = require('axios');
@@ -12,25 +12,55 @@ class NotificationService {
     this.prisma = prisma;
     this.botToken = process.env.TELEGRAM_BOT_TOKEN;
     this.apiUrl = `https://api.telegram.org/bot${this.botToken}`;
+    this.maxRetries = 3;
+    this.retryDelay = 1000; // 1 second
   }
 
   /**
-   * Отправить сообщение через Bot API
+   * Отправить сообщение через Bot API с retry
    */
-  async sendMessage(chatId, text, options = {}) {
+  async sendMessage(chatId, text, options = {}, retryCount = 0) {
     try {
       const response = await axios.post(`${this.apiUrl}/sendMessage`, {
         chat_id: chatId,
         text,
         parse_mode: options.parse_mode || 'HTML',
         ...options
+      }, {
+        timeout: 10000 // 10 seconds timeout
       });
       
       return response.data;
     } catch (error) {
-      console.error('Telegram API error:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.description || error.message;
+      const errorCode = error.response?.status;
+      
+      // Log error
+      console.error(`Telegram API error (attempt ${retryCount + 1}):`, {
+        chatId,
+        error: errorMessage,
+        code: errorCode
+      });
+      
+      // Retry on network errors or 5xx errors
+      if (retryCount < this.maxRetries && (
+        error.code === 'ECONNRESET' ||
+        error.code === 'ETIMEDOUT' ||
+        errorCode >= 500
+      )) {
+        await this.delay(this.retryDelay * (retryCount + 1));
+        return this.sendMessage(chatId, text, options, retryCount + 1);
+      }
+      
       throw error;
     }
+  }
+
+  /**
+   * Delay helper
+   */
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -57,12 +87,17 @@ class NotificationService {
 ⚠️ Напоминание придёт за 24 часа и за 1 час до визита.
     `.trim();
     
-    const result = await this.sendMessage(booking.telegramId, message);
-    
-    // Логировать уведомление
-    await this.logNotification(booking.businessId, booking.id, 'booking_created', booking.telegramId, 'sent');
-    
-    return result;
+    try {
+      const result = await this.sendMessage(booking.telegramId, message);
+      
+      // Логировать уведомление
+      await this.logNotification(booking.businessId, booking.id, 'booking_created', booking.telegramId, 'sent');
+      
+      return result;
+    } catch (error) {
+      await this.logNotification(booking.businessId, booking.id, 'booking_created', booking.telegramId, 'failed', error.message);
+      throw error;
+    }
   }
 
   /**
@@ -106,13 +141,18 @@ ${booking.telegramId ? `📱 <b>Telegram ID:</b> ${booking.telegramId}\n` : ''}
       ]
     };
     
-    const result = await this.sendMessage(business.adminTelegramId, message, {
-      reply_markup: keyboard
-    });
-    
-    await this.logNotification(booking.businessId, booking.id, 'admin_notification', business.adminTelegramId, 'sent');
-    
-    return result;
+    try {
+      const result = await this.sendMessage(business.adminTelegramId, message, {
+        reply_markup: keyboard
+      });
+      
+      await this.logNotification(booking.businessId, booking.id, 'admin_notification', business.adminTelegramId, 'sent');
+      
+      return result;
+    } catch (error) {
+      await this.logNotification(booking.businessId, booking.id, 'admin_notification', business.adminTelegramId, 'failed', error.message);
+      throw error;
+    }
   }
 
   /**
@@ -138,17 +178,22 @@ ${booking.telegramId ? `📱 <b>Telegram ID:</b> ${booking.telegramId}\n` : ''}
 Если вы не можете прийти, пожалуйста, отмените запись.
     `.trim();
     
-    const result = await this.sendMessage(booking.telegramId, message);
-    
-    // Обновить флаг напоминания
-    await this.prisma.booking.update({
-      where: { id: booking.id },
-      data: { reminder24hSent: true }
-    });
-    
-    await this.logNotification(booking.businessId, booking.id, 'reminder_24h', booking.telegramId, 'sent');
-    
-    return result;
+    try {
+      const result = await this.sendMessage(booking.telegramId, message);
+      
+      // Обновить флаг напоминания
+      await this.prisma.booking.update({
+        where: { id: booking.id },
+        data: { reminder24hSent: true }
+      });
+      
+      await this.logNotification(booking.businessId, booking.id, 'reminder_24h', booking.telegramId, 'sent');
+      
+      return result;
+    } catch (error) {
+      await this.logNotification(booking.businessId, booking.id, 'reminder_24h', booking.telegramId, 'failed', error.message);
+      throw error;
+    }
   }
 
   /**
@@ -171,17 +216,22 @@ ${booking.telegramId ? `📱 <b>Telegram ID:</b> ${booking.telegramId}\n` : ''}
 Мы вас ждём!
     `.trim();
     
-    const result = await this.sendMessage(booking.telegramId, message);
-    
-    // Обновить флаг напоминания
-    await this.prisma.booking.update({
-      where: { id: booking.id },
-      data: { reminder1hSent: true }
-    });
-    
-    await this.logNotification(booking.businessId, booking.id, 'reminder_1h', booking.telegramId, 'sent');
-    
-    return result;
+    try {
+      const result = await this.sendMessage(booking.telegramId, message);
+      
+      // Обновить флаг напоминания
+      await this.prisma.booking.update({
+        where: { id: booking.id },
+        data: { reminder1hSent: true }
+      });
+      
+      await this.logNotification(booking.businessId, booking.id, 'reminder_1h', booking.telegramId, 'sent');
+      
+      return result;
+    } catch (error) {
+      await this.logNotification(booking.businessId, booking.id, 'reminder_1h', booking.telegramId, 'failed', error.message);
+      throw error;
+    }
   }
 
   /**
@@ -202,8 +252,12 @@ ${booking.telegramId ? `📱 <b>Telegram ID:</b> ${booking.telegramId}\n` : ''}
 ${reason ? `Причина: ${reason}` : 'Запись отменена.'}
       `.trim();
       
-      await this.sendMessage(booking.telegramId, clientMessage);
-      recipients.push(booking.telegramId);
+      try {
+        await this.sendMessage(booking.telegramId, clientMessage);
+        recipients.push(booking.telegramId);
+      } catch (error) {
+        console.error('Failed to send cancellation to client:', error);
+      }
     }
     
     // Администратору
@@ -225,8 +279,12 @@ ${reason ? `Причина: ${reason}` : 'Запись отменена.'}
 ${reason ? `Причина: ${reason}` : ''}
       `.trim();
       
-      await this.sendMessage(business.adminTelegramId, adminMessage);
-      recipients.push(business.adminTelegramId);
+      try {
+        await this.sendMessage(business.adminTelegramId, adminMessage);
+        recipients.push(business.adminTelegramId);
+      } catch (error) {
+        console.error('Failed to send cancellation to admin:', error);
+      }
     }
     
     await this.logNotification(booking.businessId, booking.id, 'cancellation', recipients.join(','), 'sent');
@@ -253,11 +311,16 @@ ${reason ? `Причина: ${reason}` : ''}
 📍 <b>Адрес:</b> ${business?.address || 'Не указан'}
     `.trim();
     
-    const result = await this.sendMessage(booking.telegramId, message);
-    
-    await this.logNotification(booking.businessId, booking.id, 'reschedule', booking.telegramId, 'sent');
-    
-    return result;
+    try {
+      const result = await this.sendMessage(booking.telegramId, message);
+      
+      await this.logNotification(booking.businessId, booking.id, 'reschedule', booking.telegramId, 'sent');
+      
+      return result;
+    } catch (error) {
+      await this.logNotification(booking.businessId, booking.id, 'reschedule', booking.telegramId, 'failed', error.message);
+      throw error;
+    }
   }
 
   /**

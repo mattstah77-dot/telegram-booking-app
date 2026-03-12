@@ -13,9 +13,12 @@ async function adminCommand(ctx) {
     return ctx.reply('⛔ У вас нет доступа к этой команде');
   }
 
-  const webAppUrl = process.env.TELEGRAM_WEBAPP_URL 
-    ? `${process.env.TELEGRAM_WEBAPP_URL}/admin`
-    : 'https://booking-miniapp.onrender.com/admin';
+  // Используем BACKEND_URL для WebApp (чтобы работал SPA fallback)
+  const webAppUrl = process.env.BACKEND_URL 
+    ? `${process.env.BACKEND_URL}/admin`
+    : process.env.TELEGRAM_WEBAPP_URL 
+      ? `${process.env.TELEGRAM_WEBAPP_URL}/admin`
+      : 'https://booking-app-backend-jeme.onrender.com/admin';
 
   const text = `
 🎛️ <b>Админ-панель</b>

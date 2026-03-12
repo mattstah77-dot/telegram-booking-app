@@ -20,11 +20,11 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API (with integrated Telegram Bot)
+  # Backend API (with integrated Telegram Bot and Miniapp)
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: booking-backend
     restart: unless-stopped
     environment:
@@ -33,6 +33,7 @@ services:
       DATABASE_URL: postgresql://${DB_USER:-booking}:${DB_PASSWORD:-booking123}@postgres:5432/${DB_NAME:-booking}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_WEBAPP_URL: ${TELEGRAM_WEBAPP_URL}
+      BACKEND_URL: ${BACKEND_URL}
       BUSINESS_ID: ${BUSINESS_ID}
       ADMIN_TELEGRAM_ID: ${ADMIN_TELEGRAM_ID}
       JWT_SECRET: ${JWT_SECRET}

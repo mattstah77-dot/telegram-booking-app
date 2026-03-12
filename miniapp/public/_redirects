@@ -1,1 +1,9 @@
+# SPA fallback for all routes
 /*    /index.html   200
+
+# Explicit admin routes
+/admin   /index.html   200
+/admin/* /index.html   200
+/admin/services /index.html 200
+/admin/bookings /index.html 200
+/admin/schedule /index.html 200

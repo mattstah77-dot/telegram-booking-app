@@ -13,12 +13,9 @@ async function adminCommand(ctx) {
     return ctx.reply('⛔ У вас нет доступа к этой команде');
   }
 
-  // Используем BACKEND_URL для WebApp (чтобы работал SPA fallback)
-  const webAppUrl = process.env.BACKEND_URL 
-    ? `${process.env.BACKEND_URL}/admin`
-    : process.env.TELEGRAM_WEBAPP_URL 
-      ? `${process.env.TELEGRAM_WEBAPP_URL}/admin`
-      : 'https://booking-app-backend-jeme.onrender.com/admin';
+  // Используем BACKEND_URL или miniapp URL с hash routing
+  const webAppUrl = process.env.BACKEND_URL || 'https://booking-app-backend-jeme.onrender.com';
+  const fullUrl = `${webAppUrl}/#/admin`;
 
   const text = `
 🎛️ <b>Админ-панель</b>
@@ -31,7 +28,7 @@ async function adminCommand(ctx) {
   `.trim();
 
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.webApp('⚙️ Открыть админ панель', webAppUrl)],
+    [Markup.button.webApp('⚙️ Открыть админ панель', fullUrl)],
   ]);
 
   await ctx.reply(text, {

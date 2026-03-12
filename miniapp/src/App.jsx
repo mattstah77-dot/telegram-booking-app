@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, HashRouter } from 'react-router-dom';
 import Services from './pages/Services';
 import Calendar from './pages/Calendar';
 import TimeSlots from './pages/TimeSlots';
@@ -12,27 +12,29 @@ import AdminSchedule from './pages/admin/AdminSchedule';
 
 function App() {
   return (
-    <div className="min-h-screen bg-tg-bg">
-      <Routes>
-        {/* Client routes */}
-        <Route path="/" element={<Services />} />
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/slots" element={<TimeSlots />} />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/confirmation" element={<Confirmation />} />
-        
-        {/* Admin routes - with wildcard for nested routes */}
-        <Route path="/admin/*" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="services" element={<AdminServices />} />
-          <Route path="bookings" element={<AdminBookings />} />
-          <Route path="schedule" element={<AdminSchedule />} />
-        </Route>
-        
-        {/* Fallback */}
-        <Route path="*" element={<Services />} />
-      </Routes>
-    </div>
+    <HashRouter>
+      <div className="min-h-screen bg-tg-bg">
+        <Routes>
+          {/* Client routes */}
+          <Route path="/" element={<Services />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/slots" element={<TimeSlots />} />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/confirmation" element={<Confirmation />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin/*" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="services" element={<AdminServices />} />
+            <Route path="bookings" element={<AdminBookings />} />
+            <Route path="schedule" element={<AdminSchedule />} />
+          </Route>
+          
+          {/* Fallback */}
+          <Route path="*" element={<Services />} />
+        </Routes>
+      </div>
+    </HashRouter>
   );
 }
 

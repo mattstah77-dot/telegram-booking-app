@@ -83,16 +83,6 @@ app.use('/api/business', businessRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/init', initRoutes);
 
-// SPA Fallback - отдаём index.html для React роутов
-// Это нужно для работы Admin Panel
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../miniapp/dist/index.html'));
-});
-
-app.get('/admin/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../miniapp/dist/index.html'));
-});
-
 // Error handling
 app.use((err, req, res, next) => {
   console.error('Error:', err);
